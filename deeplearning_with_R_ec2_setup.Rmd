@@ -1,7 +1,9 @@
 ---
-title: "Setting up AWS EC2 Instance for Deep Learning with R and RStudio"
-output: html_document
+title: 
+output: md_document
 ---
+
+# Setting up AWS EC2 Instance for Deep Learning with R and RStudio
 
 I worked through the [instructions](https://tensorflow.rstudio.com/tools/cloud_gpu.html) for setup of EC2 instance for deep learning that were listed in the R for tensorflow website. Appendix B in [Deep Learning for R](https://www.manning.com/books/deep-learning-with-r) also covers this. However, I had to make some tweaks to get things working and so I wanted to catalog what I did here (most of content below is same as the instructions in RStudio website). I have noted explicitly where I had to make some changes compared to instructions in the RStudio website. 
 
@@ -71,7 +73,7 @@ Refer to SSH tunnel access and plain HTTP access in the [instructions](https://t
 
 ### Running the Getting Started with Keras code
 
-There are just a couple of more things I had to do before being able to run the [getting started with Keras](https://cran.r-project.org/web/packages/keras/vignettes/getting_started.html) code. I installed keras using the `install.packages("keras")` command. The AMI already has tensorflow and keras installed in conda environments. I used the conda environment "tensorflow_p36". Also, anaconda is installed under /home/ubuntu. Since we are logging into RStudio as a different user, we need to added the path to anaconda. So before running the code, I executed the following 2 commands within the RStudio session
+There are just a couple of more things I had to do before being able to run the [getting started with Keras](https://cran.r-project.org/web/packages/keras/vignettes/getting_started.html) code. I installed keras using the `install.packages("keras")` command. The AMI already has tensorflow and keras installed in conda environments. I used the conda environment "tensorflow_p36". Also, anaconda is installed under /home/ubuntu. Since we are logging into RStudio as a different user, we need to add the path to anaconda (Otherwise, we will get an error with `use_condaenv` command that conda binary was not found). So before running the code, I executed the following 2 commands within the RStudio session
 
 ```{r, eval = FALSE}
 # add anaconda3 in /home/ubuntu to current user PATH

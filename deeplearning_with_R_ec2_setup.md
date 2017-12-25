@@ -1,3 +1,6 @@
+Setting up AWS EC2 Instance for Deep Learning with R and RStudio
+================================================================
+
 I worked through the
 [instructions](https://tensorflow.rstudio.com/tools/cloud_gpu.html) for
 setup of EC2 instance for deep learning that were listed in the R for
@@ -90,9 +93,10 @@ code. I installed keras using the `install.packages("keras")` command.
 The AMI already has tensorflow and keras installed in conda
 environments. I used the conda environment "tensorflow\_p36". Also,
 anaconda is installed under /home/ubuntu. Since we are logging into
-RStudio as a different user, we need to added the path to anaconda. So
-before running the code, I executed the following 2 commands within the
-RStudio session
+RStudio as a different user, we need to add the path to anaconda
+(Otherwise, we will get an error with `use_condaenv` command that conda
+binary was not found). So before running the code, I executed the
+following 2 commands within the RStudio session
 
     # add anaconda3 in /home/ubuntu to current user PATH
     Sys.setenv(PATH=paste("/home/ubuntu/anaconda3/bin",Sys.getenv("PATH"),sep=":"))
