@@ -32,7 +32,7 @@ p2.xlarge instance type.
 *Note: The AMI suggested in RStudio instructions
 <https://aws.amazon.com/marketplace/pp/B01M0AXXQB> didn't have apt-get
 installed in it. Since I couldn't figure out how to install it (due to
-my lack of familiarity with linux), I didn't use that AMI). *
+my lack of familiarity with linux), I didn't use that AMI).*
 
 ### Installing R in the EC2 instance
 
