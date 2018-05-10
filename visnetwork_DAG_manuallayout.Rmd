@@ -1,0 +1,187 @@
+---
+title: "Creating Manual Layouts for Acyclic Directed Graphs with VisNetwork"
+output: html_document
+---
+
+I have been interested in using manual layouts of acyclic directed graphs when using [visNetwork](https://cran.r-project.org/web/packages/visNetwork/index.html). The documentation mentions that you can do that by directly specifying columns `x` and `y` in `nodes` dataframe. I am trying that with a 4 node network with no edges. The numbers for `x` and `y` in hundreds seem to render the graph fine. So it looks like it may be in pixel units with low number being in top-left corner and high numbers in bottom-right corner.
+
+```{r}
+library(visNetwork)
+
+nodes = data.frame(id = c(1, 2, 3, 4))
+nodes$label = paste0("node_", nodes$id)
+
+# directly specify x and y columns in nodes dataframe (the magnitude looks like pixel 
+# coordinates) with lower values in top left and higher values in bottom right
+nodes$x = c(100, 200, 300, 400)
+nodes$y = c(100, 100, 100, 100)
+
+g = visNetwork(nodes, edges = NULL)
+
+g %>% visNodes(physics = FALSE) %>% 
+  visEdges(smooth = FALSE) %>% visPhysics(stabilization = FALSE)
+
+```
+
+Next I tried the method that is used in [visIgraphLayout](https://github.com/datastorm-open/visNetwork/blob/master/R/visIgraphLayout.R) function where the `x` and `y` coordinates are assigned to a dataframe associated with the graph object as in the code below. But the magnitude of `x` and `y` are not in hunderds but closer to one. 
+
+```{r}
+nodes = data.frame(id = c(1, 2, 3, 4))
+nodes$label = paste0("node_", nodes$id)
+
+g = visNetwork(nodes, edges = NULL)
+
+# coordinates - negative is top left, positive is bottom right on screen
+# code below based on 
+# https://github.com/datastorm-open/visNetwork/blob/master/R/visIgraphLayout.R
+# which works with g$x$nodes and x,y coordinates are in the 
+# box (-xscale, -yscale) to (xscale, yscale) and sets layout as tree_layout
+
+xscale = 2
+yscale = 2
+g$x$nodes$x = c(-1, -0.3, 0.3, 1) * xscale
+g$x$nodes$y = c(0, 0, 0, 0) * yscale
+
+g$x$igraphlayout = "tree_layout"
+
+g %>% visNodes(physics = FALSE) %>% 
+  visEdges(smooth = FALSE) %>% visPhysics(stabilization = FALSE)
+
+```
+
+The following example is a 4 node graph with edges where again `x` and `y` are directly set in nodes dataframe.
+
+```{r}
+nodes = data.frame(id = c(1, 2, 3, 4))
+nodes$label = paste0("node_", nodes$id)
+edges = data.frame(from = c(1, 2, 3), to = c(2, 3, 4))
+edges$arrows = "to"
+
+# directly specify x and y columns in nodes dataframe (the magnitude looks like pixel 
+# coordinates) with lower values in top left and higher values in bottom right
+nodes$x = c(100, 200, 300, 400)
+nodes$y = c(100, 300, 0, 500)
+
+g = visNetwork(nodes, edges)
+
+g %>% visNodes(physics = FALSE) %>% 
+  visEdges(smooth = FALSE) %>% visPhysics(stabilization = FALSE)
+
+```
+
+The following example works with same graph as above but sets `x` and `y` in the graph object
+
+```{r}
+nodes = data.frame(id = c(1, 2, 3, 4))
+nodes$label = paste0("node_", nodes$id)
+edges = data.frame(from = c(1, 2, 3), to = c(2, 3, 4))
+edges$arrows = "to"
+
+g = visNetwork(nodes, edges)
+
+# coordinates - negative is top left, positive is bottom right on screen
+# code below based on 
+# https://github.com/datastorm-open/visNetwork/blob/master/R/visIgraphLayout.R
+# which works with g$x$nodes and x,y coordinates are in the 
+# box (-xscale, -yscale) to (xscale, yscale) and sets layout as tree_layout
+
+xscale = 2
+yscale = 2
+g$x$nodes$x = c(-1, -0.3, 0.3, 1) * xscale
+g$x$nodes$y = c(0, 1, -1, 2) * yscale
+
+g$x$igraphlayout = "tree_layout"
+
+g %>% visNodes(physics = FALSE) %>% 
+  visEdges(smooth = FALSE) %>% visPhysics(stabilization = FALSE)
+
+```
+
+We can also start with coordinates from igraph layout_as_tree function and make modifications when plotting using visNetwork. For example, the layout_as_tree function with igraph plots the graph in a vertical direction (either top to down or down to top) as shown below.
+
+```{r}
+library(igraph)
+edgesM = matrix(c(1,2,1,3,2,3,2,4,3,5,4,6,5,6), ncol = 2, byrow = TRUE)
+g = graph_from_edgelist(edgesM)
+plot(g, layout = layout_as_tree)
+```
+
+```{r}
+plot(g, layout=layout_as_tree(g, flip.y = FALSE))
+```
+
+Next we see that we can use the coordinates of igraph layout with visNetwork and be able to get a horizontal plot.
+```{r}
+# get nodes and edges dataframe of graph g
+edges = as.data.frame(get.edgelist(g))
+names(edges) = c("from", "to")
+edges$arrows = "to"
+nodes = data.frame(id = as.numeric(V(g)))
+nodes$label = nodes$id
+```
+
+```{r}
+# adapted from 
+# https://github.com/datastorm-open/visNetwork/blob/master/R/visIgraphLayout.R
+edgesM = matrix(c(1,2,1,3,2,3,2,4,3,5,4,6,5,6), ncol = 2, byrow = TRUE)
+g = graph_from_edgelist(edgesM)
+coord = layout_as_tree(g, flip.y = FALSE)
+
+g = visNetwork(nodes, edges)
+
+# flip the x and y coordinates of igraph output to make the graph horizontal
+xcoord = coord[,2]
+ycoord = coord[,1]
+
+to <- c(-1, 1)
+from <- range(xcoord, na.rm = TRUE, finite = TRUE)
+xcoord_scaled <- (xcoord - from[1])/diff(from) * diff(to) + to[1]
+
+to <- c(-1, 1)
+from <- range(ycoord, na.rm = TRUE, finite = TRUE)
+ycoord_scaled <- (ycoord - from[1])/diff(from) * diff(to) + to[1]
+
+g$x$nodes$x = xcoord_scaled
+g$x$nodes$y = ycoord_scaled
+
+g$x$igraphlayout <- "layout_as_tree"
+  
+g %>% visNodes(physics = FALSE) %>% 
+    visEdges(smooth = FALSE) %>% visPhysics(stabilization = FALSE)
+```
+
+Now we can use this to tweak the layout manually. For example, if we want the `x` coordinates to be the same as above layout but want to manually impose `y` coordinates, we can just set the `y` coordinates manually and scale them as shown below.
+
+```{r}
+# adapted from 
+# https://github.com/datastorm-open/visNetwork/blob/master/R/visIgraphLayout.R
+edgesM = matrix(c(1,2,1,3,2,3,2,4,3,5,4,6,5,6), ncol = 2, byrow = TRUE)
+g = graph_from_edgelist(edgesM)
+coord = layout_as_tree(g, flip.y = FALSE)
+
+g = visNetwork(nodes, edges)
+
+# use igraph coordinates for x and manual coordinates for y
+xcoord = coord[,2]
+ycoord = c(1, 2, 0, 3, -1, 4)
+
+to <- c(-1, 1)
+from <- range(xcoord, na.rm = TRUE, finite = TRUE)
+xcoord_scaled <- (xcoord - from[1])/diff(from) * diff(to) + to[1]
+
+to <- c(-1, 1)
+from <- range(ycoord, na.rm = TRUE, finite = TRUE)
+ycoord_scaled <- (ycoord - from[1])/diff(from) * diff(to) + to[1]
+
+g$x$nodes$x = xcoord_scaled
+g$x$nodes$y = ycoord_scaled
+
+g$x$igraphlayout <- "layout_as_tree"
+  
+g %>% visNodes(physics = FALSE) %>% 
+    visEdges(smooth = FALSE) %>% visPhysics(stabilization = FALSE)
+```
+
+```{r}
+sessionInfo()
+```
