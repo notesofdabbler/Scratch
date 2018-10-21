@@ -5,7 +5,7 @@
 
 getid = function(x) {
       id = strsplit(x, ",")[[1]][1]
-      idclean = gsub("\"","",y2)
+      idclean = gsub("\"","",id)
       return(idclean)
       }
 
