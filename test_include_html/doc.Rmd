@@ -1,0 +1,13 @@
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Pythagoras Theorem
+
+$$x^2 + y^2 = z^2$$
+
+## Euler Identity
+
+$$ e^{i\pi} + 1 = 0 $$
