@@ -1,5 +1,10 @@
 # Test include html
 
+# solved in the following posts
+#  https://stackoverflow.com/questions/64385529/including-a-html-file-rendered-from-rmarkdown-in-r-shiny-apps-using-shinydashboa
+# https://community.rstudio.com/t/including-a-html-file-rendered-from-rmarkdown-in-r-shiny-apps-using-shinydashboard-is-causing-tabitems-to-break/84819
+
+
 library(shiny)
 
 ui <- navbarPage("Test Include HTML",
@@ -14,7 +19,7 @@ ui <- navbarPage("Test Include HTML",
                    h3("This is menu 2")
                    ),
           tabPanel("Doc",
-                  includeHTML("doc.html")
+                   htmltools::tags$iframe(src = "doc.html", width = '100%',  height = 1000,  style = "border:none;")
                    )
 )
 
